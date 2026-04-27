@@ -179,7 +179,6 @@
         <div id="g-quiz" style="display:none">
             <div class="status-row">
                 <span class="status-badge" id="g-status">문제 1 / 50</span>
-                <button class="stop-btn" onclick="finishQuiz(true)">🛑 중간 채점</button>
             </div>
             <div class="evo-box">
                 <div class="evo-emoji" id="gevo-e">🥚</div>
@@ -213,6 +212,7 @@
                 <h3>🔍 틀린 문제 복습</h3>
                 <div id="g-wrong-items"></div>
             </div>
+            <button class="primary-btn" id="continue-btn" style="display:none;background:#2563eb;box-shadow:0 4px 14px rgba(37,99,235,.3)" onclick="continueQuiz()">이어서 풀기 ▶️</button>
             <button class="primary-btn" onclick="resetQuiz()">새로운 알 부화하기 🔄</button>
             <button class="primary-btn yellow" id="retry-btn" style="margin-top:8px;display:none" onclick="retryWrong()">틀린 문제만 다시 풀기 🔁</button>
         </div>
@@ -837,28 +837,39 @@ function finishQuiz(early=false){
         document.getElementById('g-quiz').style.display='none';
         document.getElementById('g-result').style.display='block';
 
+        // 이어서 풀기 버튼 — 중간채점이고 남은 문제가 있을 때만 표시
+        const contBtn=document.getElementById('continue-btn');
+        if(early && qIdx < qList.length){
+            contBtn.style.display='block';
+            contBtn.innerText=`이어서 풀기 (${qList.length - qIdx}문제 남음) ▶️`;
+        } else {
+            contBtn.style.display='none';
+        }
+
         // emoji & score
         const em=document.getElementById('g-res-e');
         em.innerText = sc>=90?'🐉✨':sc>=70?'🐲':sc>=50?'🦖':'🥚💦';
         const sd=document.getElementById('g-score');
         sd.innerText=sc+'점';
         sd.style.color=sc>=90?'var(--main)':sc>=70?'#d97706':'var(--red)';
-        document.getElementById('g-detail').innerText=`정답: ${qOK}개 / ${tot}문항`;
+        document.getElementById('g-detail').innerText=`정답: ${qOK}개 / ${tot}문항 (중간 채점)`.replace(' (중간 채점)', early?' (중간 채점)':'');
         const msg=document.getElementById('g-msg');
         msg.innerText=sc>=90?'🎉 완벽한 전치사 마스터!':sc>=70?'👍 잘했어요! 조금만 더!':'💪 다시 도전해봐요!';
         msg.style.color=sc>=90?'var(--green)':sc>=70?'#d97706':'var(--red)';
 
         // breakdown
         const bd=document.getElementById('g-breakdown');
-        bd.innerHTML='<h3>📊 Unit별 성적</h3>';
+        bd.innerHTML='<h3>📊 Unit별 성적 (현재까지)</h3>';
         Object.entries(unitStats).forEach(([unit,st])=>{
-            if(st.total===0) return;
-            const pct=st.total>0?Math.round(st.ok/st.total*100):0;
+            if(st.ok===0 && st.total===0) return;
+            const answered=st.ok+(wrongList.filter(q=>q.unit===unit).length);
+            if(answered===0) return;
+            const pct=answered>0?Math.round(st.ok/answered*100):0;
             bd.insertAdjacentHTML('beforeend',`
                 <div class="bd-row">
                     <span class="bd-label">${unit}</span>
                     <div class="bd-bar-bg"><div class="bd-bar" style="width:${pct}%"></div></div>
-                    <span class="bd-score">${st.ok}/${st.total}</span>
+                    <span class="bd-score">${st.ok}/${answered}</span>
                 </div>`);
         });
 
@@ -882,10 +893,18 @@ function finishQuiz(early=false){
             retryBtn.style.display='none';
         }
 
-        saveHistory(sc, qOK, tot);
+        if(!early){ saveHistory(sc, qOK, tot); }
         if(!early && sc>=90) boom();
         window.scrollTo({top:0,behavior:'smooth'});
     },500);
+}
+
+function continueQuiz(){
+    // 결과 화면 숨기고 퀴즈 화면으로 복귀 — qIdx는 유지
+    document.getElementById('g-result').style.display='none';
+    document.getElementById('g-quiz').style.display='block';
+    loadQ();
+    window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function retryWrong(){
