@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>수리나무학원 - Data Saved Thousands of Lives</title>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <style>
 :root{
   --main:#2563eb;
@@ -380,10 +381,11 @@ body{
   font-weight:900;
   cursor:pointer;
   user-select:none;
-  touch-action:none;
+  touch-action:manipulation;
 }
 .word-chip.in-answer{background:#fff7df;border-color:#f59e0b}
-.word-chip.dragging{opacity:.45;transform:scale(1.04)}
+.sortable-ghost{opacity:1!important;background:#dcfce7!important;border-color:#22c55e!important}
+.sortable-drag{opacity:1!important;background:var(--main)!important;color:white!important;border-color:var(--main2)!important;transform:scale(1.06)!important;box-shadow:0 10px 20px rgba(37,99,235,.24)!important}
 .audio-row{display:flex;gap:8px;margin-top:10px}
 .audio-row button{flex:1}
 .grammar-card{
@@ -915,7 +917,7 @@ function finishWord(early){
   if(!early) goodPop("완료!");
 }
 function resetWord(){document.getElementById("word-result").style.display="none";document.getElementById("word-intro").style.display="block";}
-let dIdx=0,isLoop=false,loopTimer=null,spIdx=0,dragChip=null,dragMoved=false,dragStartX=0,dragStartY=0;
+let dIdx=0,isLoop=false,loopTimer=null,spIdx=0,chipSeq=0;
 const speeds=[.78,.64,.52],speedLabels=["보통 속도","느리게","아주 느리게"];
 function loadDict(autoPlay=false){
   stopAudio();
@@ -927,104 +929,48 @@ function loadDict(autoPlay=false){
   const scramble=document.getElementById("scramble-area");
   answer.innerHTML="";scramble.innerHTML="";
   answer.style.background="#eef5ff";answer.style.borderColor="var(--main)";
-  shuffle(s.en.split(" ")).forEach((word,i)=>{
+  shuffle(s.en.split(" ").filter(Boolean)).forEach((word)=>{
     const chip=document.createElement("button");
     chip.className="word-chip";
+    chip.type="button";
     chip.innerText=word;
-    chip.draggable=true;
-    chip.dataset.id=i;
-    chip.onclick=()=>moveChip(chip);
-    chip.addEventListener("dragstart",startChipDrag);
-    chip.addEventListener("dragend",endChipDrag);
-    chip.addEventListener("pointerdown",startPointerDrag);
+    chip.dataset.id=`chip-${++chipSeq}`;
+    chip.dataset.word=word;
+    chip.onclick=function(){
+      if(this.parentElement.id==="scramble-area"){
+        answer.appendChild(this);
+        this.classList.add("in-answer");
+      }else{
+        scramble.appendChild(this);
+        this.classList.remove("in-answer");
+      }
+      afterChipMove();
+    };
     scramble.appendChild(chip);
   });
-  setupDropArea(answer);
-  setupDropArea(scramble);
+  initDictSortables();
   if(autoPlay) startLoop();
 }
-function startChipDrag(e){
-  dragChip=e.currentTarget;
-  dragMoved=false;
-  dragChip.classList.add("dragging");
-  if(e.dataTransfer){
-    e.dataTransfer.effectAllowed="move";
-    e.dataTransfer.setData("text/plain",dragChip.dataset.id||"word");
-  }
-}
-function endChipDrag(){
-  if(dragChip) dragChip.classList.remove("dragging");
-  dragChip=null;
-  setTimeout(()=>{dragMoved=false;},0);
-}
-function setupDropArea(area){
-  area.ondragover=e=>{
-    e.preventDefault();
-    const chip=dragChip||document.querySelector(".word-chip.dragging");
-    if(!chip) return;
-    insertChipAt(area,chip,e.clientX,e.clientY);
-  };
-  area.ondrop=e=>{
-    e.preventDefault();
-    const chip=dragChip||document.querySelector(".word-chip.dragging");
-    if(!chip) return;
-    insertChipAt(area,chip,e.clientX,e.clientY);
-    chip.classList.remove("dragging");
-    dragChip=null;
-    afterChipMove();
-  };
-}
-function insertChipAt(area,chip,x,y){
-  const before=findInsertBefore(area,chip,x,y);
-  if(before) area.insertBefore(chip,before);
-  else area.appendChild(chip);
-  chip.classList.toggle("in-answer",area.id==="answer-area");
-}
-function findInsertBefore(area,chip,x,y){
-  const items=[...area.querySelectorAll(".word-chip")].filter(el=>el!==chip);
-  for(const el of items){
-    const r=el.getBoundingClientRect();
-    const midY=r.top+r.height/2;
-    const midX=r.left+r.width/2;
-    if(y<midY || (y<=r.bottom && y>=r.top && x<midX)) return el;
-  }
-  return null;
-}
-function startPointerDrag(e){
-  if(e.pointerType==="mouse") return;
-  dragChip=e.currentTarget;
-  dragMoved=false;
-  dragStartX=e.clientX;
-  dragStartY=e.clientY;
-  dragChip.classList.add("dragging");
-  dragChip.setPointerCapture(e.pointerId);
-  dragChip.addEventListener("pointermove",pointerMove);
-  dragChip.addEventListener("pointerup",endPointerDrag,{once:true});
-  dragChip.addEventListener("pointercancel",endPointerDrag,{once:true});
-}
-function pointerMove(e){
-  if(!dragChip) return;
-  if(Math.abs(e.clientX-dragStartX)+Math.abs(e.clientY-dragStartY)>8) dragMoved=true;
-  const area=document.elementFromPoint(e.clientX,e.clientY)?.closest?.(".answer-area,.scramble-area");
-  if(area) insertChipAt(area,dragChip,e.clientX,e.clientY);
-}
-function endPointerDrag(e){
-  if(dragChip){
-    dragChip.releasePointerCapture?.(e.pointerId);
-    dragChip.classList.remove("dragging");
-    dragChip.removeEventListener("pointermove",pointerMove);
-  }
-  dragChip=null;
-  afterChipMove();
-  setTimeout(()=>{dragMoved=false;},0);
-}
-function moveChip(chip){
-  if(dragMoved) return;
+function initDictSortables(){
   const answer=document.getElementById("answer-area");
   const scramble=document.getElementById("scramble-area");
-  if(chip.parentElement===scramble){answer.appendChild(chip);chip.classList.add("in-answer");}
-  else{scramble.appendChild(chip);chip.classList.remove("in-answer");}
-  afterChipMove();
+  if(window._dictAnswerSortable) window._dictAnswerSortable.destroy();
+  if(window._dictScrambleSortable) window._dictScrambleSortable.destroy();
+  if(typeof Sortable==="undefined") return;
+  const opts={
+    group:"dict-words",
+    animation:280,
+    ghostClass:"sortable-ghost",
+    dragClass:"sortable-drag",
+    swapThreshold:.65,
+    onEnd:()=>{
+      [...answer.querySelectorAll(".word-chip")].forEach(chip=>chip.classList.add("in-answer"));
+      [...scramble.querySelectorAll(".word-chip")].forEach(chip=>chip.classList.remove("in-answer"));
+      afterChipMove();
+    }
+  };
+  window._dictAnswerSortable=new Sortable(answer,opts);
+  window._dictScrambleSortable=new Sortable(scramble,opts);
 }
 function afterChipMove(){
   const scramble=document.getElementById("scramble-area");
