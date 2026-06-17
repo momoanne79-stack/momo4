@@ -7,9 +7,9 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <style>
 :root{
-  --main:#2563eb;
-  --main2:#7c3aed;
-  --accent:#f59e0b;
+  --main:#0f8f4f;
+  --main2:#14532d;
+  --accent:#facc15;
   --green:#16a34a;
   --red:#ef4444;
   --ink:#172033;
@@ -24,9 +24,9 @@ body{
   padding:16px;
   color:var(--ink);
   background:
-    radial-gradient(circle at 15% 7%,rgba(37,99,235,.15),transparent 25%),
-    radial-gradient(circle at 88% 12%,rgba(245,158,11,.18),transparent 24%),
-    linear-gradient(180deg,#fffaf1 0%,var(--bg) 55%,#f0f5ff 100%);
+    radial-gradient(circle at 15% 7%,rgba(34,197,94,.16),transparent 25%),
+    radial-gradient(circle at 88% 12%,rgba(250,204,21,.20),transparent 24%),
+    linear-gradient(180deg,#f7fee7 0%,var(--bg) 55%,#ecfdf5 100%);
   font-family:"Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;
 }
 #app{
@@ -44,7 +44,7 @@ body{
   padding:22px 18px 18px;
   color:white;
   overflow:hidden;
-  background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 58%,#7c3aed 100%);
+  background:linear-gradient(135deg,#064e3b 0%,#16a34a 58%,#facc15 135%);
 }
 .header:before{
   content:"";
@@ -76,7 +76,7 @@ body{
 }
 .academy{
   background:#fff;
-  color:#1e40af;
+  color:#166534;
 }
 .header h1{
   position:relative;
@@ -94,7 +94,7 @@ body{
   font-weight:800;
   opacity:.9;
 }
-.hero-art{
+.hero-art,.soccer-art{
   position:relative;
   z-index:1;
   height:126px;
@@ -102,27 +102,82 @@ body{
   border-radius:18px;
   overflow:hidden;
   border:2px solid rgba(255,255,255,.42);
-  background:linear-gradient(180deg,#fef3c7,#e0f2fe);
+  background:linear-gradient(180deg,#d9f99d 0%,#86efac 100%);
 }
-.rose{
+.soccer-field{
   position:absolute;
-  left:24px;
-  top:18px;
-  width:90px;
-  height:90px;
-  border-radius:50%;
+  inset:0;
   background:
-    conic-gradient(#60a5fa 0 40deg,#fda4af 40deg 70deg,#1f2937 70deg 88deg,#60a5fa 88deg 155deg,#fda4af 155deg 190deg,#60a5fa 190deg 300deg,#1f2937 300deg 330deg,#60a5fa 330deg 360deg);
-  box-shadow:0 10px 20px rgba(37,99,235,.18);
+    linear-gradient(90deg,rgba(255,255,255,.34) 2px,transparent 2px) 50% 0/50% 100% no-repeat,
+    repeating-linear-gradient(90deg,rgba(22,163,74,.22) 0 42px,rgba(5,150,105,.22) 42px 84px);
 }
-.rose:after{
+.soccer-field:before{
   content:"";
   position:absolute;
-  inset:27px;
+  left:50%;
+  top:50%;
+  width:54px;
+  height:54px;
+  border:3px solid rgba(255,255,255,.65);
   border-radius:50%;
-  background:#fff7ed;
-  border:7px solid rgba(17,24,39,.25);
+  transform:translate(-50%,-50%);
 }
+.goal{
+  position:absolute;
+  right:20px;
+  bottom:28px;
+  width:84px;
+  height:52px;
+  border:5px solid #fff;
+  border-bottom:0;
+  border-radius:8px 8px 0 0;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.35) 1px,transparent 1px) 0 0/13px 13px,
+    linear-gradient(rgba(255,255,255,.35) 1px,transparent 1px) 0 0/13px 13px;
+  box-shadow:0 8px 18px rgba(6,78,59,.18);
+}
+.ball{
+  position:absolute;
+  left:52px;
+  bottom:30px;
+  width:43px;
+  height:43px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 50% 50%,#111 0 5px,transparent 6px),
+    radial-gradient(circle at 27% 28%,#111 0 4px,transparent 5px),
+    radial-gradient(circle at 73% 28%,#111 0 4px,transparent 5px),
+    radial-gradient(circle at 28% 72%,#111 0 4px,transparent 5px),
+    radial-gradient(circle at 72% 72%,#111 0 4px,transparent 5px),
+    #fff;
+  box-shadow:0 10px 16px rgba(6,78,59,.22);
+  animation:ballBounce 1.8s ease-in-out infinite;
+}
+.trophy{
+  position:absolute;
+  left:50%;
+  bottom:24px;
+  transform:translateX(-50%);
+  font-size:54px;
+  filter:drop-shadow(0 8px 10px rgba(6,78,59,.24));
+}
+.cheer{
+  content:"";
+  position:absolute;
+  left:22px;
+  top:15px;
+  padding:5px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.86);
+  color:#166534;
+  font-size:12px;
+  font-weight:900;
+}
+@keyframes ballBounce{
+  0%,100%{transform:translateY(0) rotate(0)}
+  50%{transform:translateY(-10px) rotate(18deg)}
+}
+.rose{display:none}
 .nurse{
   position:absolute;
   right:38px;
@@ -542,15 +597,17 @@ body{
   <div id="pop">GOOD!</div>
   <header class="header">
     <div class="brand-row">
-      <span class="badge">Reading · Data & History</span>
+      <span class="badge">World Cup Mission · Data Reading</span>
       <span class="academy">수리나무학원</span>
     </div>
     <h1>Data Saved<br>Thousands of Lives</h1>
     <p>단어 · 전체 문장 영작 · 기초 영문법</p>
-    <div class="hero-art" aria-hidden="true">
-      <div class="rose"></div>
-      <div class="chart-line"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
-      <div class="nurse"></div>
+    <div class="soccer-art" aria-hidden="true">
+      <div class="soccer-field"></div>
+      <div class="cheer">DATA GOAL!</div>
+      <div class="ball"></div>
+      <div class="goal"></div>
+      <div class="trophy">🏆</div>
     </div>
   </header>
 
@@ -564,10 +621,10 @@ body{
 
   <section id="word-sec" class="section active">
     <div id="word-intro" class="intro">
-      <div class="intro-icon">📊</div>
-      <h2>핵심 단어 먼저 익히기</h2>
-      <p>단어를 맞히며 알을 용으로 키워 보세요. 틀린 단어는 오답 단어장에 저장됩니다.</p>
-      <button class="primary-btn" onclick="initAudio();startWord()">단어 테스트 시작</button>
+      <div class="intro-icon">⚽</div>
+      <h2>단어 예선전</h2>
+      <p>핵심 단어를 맞히며 예선부터 결승까지 올라가 보세요. 틀린 단어는 오답 단어장에 저장됩니다.</p>
+      <button class="primary-btn" onclick="initAudio();startWord()">킥오프!</button>
     </div>
     <div id="word-quiz" style="display:none">
       <div class="status-row">
@@ -575,15 +632,15 @@ body{
         <button class="small-btn gray" onclick="finishWord(true)">중간 채점</button>
       </div>
       <div class="evo-box">
-        <div class="evo-emoji" id="w-evo-emoji">🥚</div>
-        <div><div class="evo-name" id="w-evo-name">신비한 알</div><div class="evo-sub" id="w-evo-sub">시작 전</div></div>
+        <div class="evo-emoji" id="w-evo-emoji">⚽</div>
+        <div><div class="evo-name" id="w-evo-name">예선 준비</div><div class="evo-sub" id="w-evo-sub">킥오프 전</div></div>
       </div>
       <div class="word-display" id="w-en"></div>
       <div class="options-grid" id="w-opts"></div>
     </div>
     <div id="word-result" class="score-card" style="display:none">
-      <div class="intro-icon">🏅</div>
-      <h2 style="color:var(--main)">단어 테스트 완료</h2>
+      <div class="intro-icon">🏆</div>
+      <h2 style="color:var(--main)">단어 경기 종료</h2>
       <div class="score-big" id="w-score">0점</div>
       <div class="score-sub" id="w-detail"></div>
       <button class="primary-btn" onclick="resetWord()">다시 풀기</button>
@@ -596,8 +653,8 @@ body{
       <button class="small-btn gray" onclick="jumpDict()">번호 이동</button>
     </div>
     <div class="evo-box">
-      <div class="evo-emoji" id="d-evo-emoji">🥚</div>
-      <div><div class="evo-name" id="d-evo-name">영작 알 깨우기</div><div class="evo-sub" id="d-evo-sub">미국식 음성 자동 반복</div></div>
+      <div class="evo-emoji" id="d-evo-emoji">⚽</div>
+      <div><div class="evo-name" id="d-evo-name">영작 킥오프</div><div class="evo-sub" id="d-evo-sub">미국식 음성 자동 반복</div></div>
     </div>
     <div class="ko-box" id="d-ko"></div>
     <div class="drag-tip">영작 탭에 들어오면 미국식 음성이 바로 반복됩니다. 단어 조각을 눌러 위 칸에 놓고, 맞으면 자동으로 다음 문장으로 넘어갑니다.</div>
@@ -616,10 +673,10 @@ body{
 
   <section id="gram-sec" class="section">
     <div id="gram-intro" class="intro">
-      <div class="intro-icon">📝</div>
-      <h2>본문 기초 영문법</h2>
-      <p>4지선다 문제를 풀고 바로 설명을 읽은 뒤 다음 문제로 넘어가요.</p>
-      <button class="primary-btn" onclick="startGram()">문법 문제 시작</button>
+      <div class="intro-icon">🥅</div>
+      <h2>문법 승부차기</h2>
+      <p>4지선다 문제를 풀고 바로 설명을 읽은 뒤 다음 슛으로 넘어가요.</p>
+      <button class="primary-btn" onclick="startGram()">승부차기 시작</button>
     </div>
     <div id="gram-quiz" style="display:none">
       <div class="status-row">
@@ -627,8 +684,8 @@ body{
         <button class="small-btn gray" onclick="finishGram(true)">중간 종료</button>
       </div>
       <div class="evo-box">
-        <div class="evo-emoji" id="g-evo-emoji">🥚</div>
-        <div><div class="evo-name" id="g-evo-name">문법 알</div><div class="evo-sub" id="g-evo-sub">설명 읽고 다음 문제</div></div>
+        <div class="evo-emoji" id="g-evo-emoji">🥅</div>
+        <div><div class="evo-name" id="g-evo-name">문법 골대 앞</div><div class="evo-sub" id="g-evo-sub">설명 읽고 다음 슛</div></div>
       </div>
       <div class="grammar-card">
         <div class="grammar-en" id="g-en"></div>
@@ -769,12 +826,12 @@ function showSection(id,btn){
 function evo(done,total,prefix){
   const r=total?done/total:0;
   const stages=[
-    [0,"🥚","신비한 알"],
-    [.001,"🐣","부화 시작"],
-    [.25,"🦎","꼬마 드래곤"],
-    [.5,"🦖","힘센 드래곤"],
-    [.75,"🐲","비상 준비"],
-    [1,"🐉✨","수리나무 마스터 용"]
+    [0,"⚽","예선 준비"],
+    [.001,"👟","첫 패스 성공"],
+    [.25,"🏃","조별리그 돌파"],
+    [.5,"🥅","골문 앞 찬스"],
+    [.75,"🔥","결승전 진출"],
+    [1,"🏆","월드컵 챔피언"]
   ];
   let st=stages[0];
   stages.forEach(x=>{if(r>=x[0]) st=x;});
@@ -784,9 +841,9 @@ function evo(done,total,prefix){
   if(!em||!name||!sub) return;
   em.innerText=st[1];
   name.innerText=st[2];
-  sub.innerText=`${Math.min(done,total)} / ${total} 단계`;
-  em.style.transform="scale(1.18)";
-  setTimeout(()=>em.style.transform="scale(1)",240);
+  sub.innerText=`${Math.min(done,total)} / ${total} 미션`;
+  em.style.transform="scale(1.18) rotate(-5deg)";
+  setTimeout(()=>em.style.transform="scale(1) rotate(0)",240);
 }
 function initAudio(){
   if(!audioCtx && (window.AudioContext||window.webkitAudioContext)) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
